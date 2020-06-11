@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:quizzler/quiz_brain.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 void main() => runApp(Quizzler());
 
@@ -25,6 +27,7 @@ class QuizPage extends StatefulWidget {
 }
 
 class _QuizPageState extends State<QuizPage> {
+  QuizBrain brain = QuizBrain();
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -36,13 +39,26 @@ class _QuizPageState extends State<QuizPage> {
           child: Padding(
             padding: EdgeInsets.all(10.0),
             child: Center(
-              child: Text(
-                'This is where the question text will go.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 25.0,
-                  color: Colors.white,
-                ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    (brain.currentQuestionNumber).toString(),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 40.0,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    brain.currentQuestionText,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 25.0,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -60,9 +76,7 @@ class _QuizPageState extends State<QuizPage> {
                   fontSize: 20.0,
                 ),
               ),
-              onPressed: () {
-                //The user picked true.
-              },
+              onPressed: () => setAnswer(true),
             ),
           ),
         ),
@@ -78,20 +92,45 @@ class _QuizPageState extends State<QuizPage> {
                   color: Colors.white,
                 ),
               ),
-              onPressed: () {
-                //The user picked false.
-              },
+              onPressed: () => setAnswer(false),
             ),
           ),
         ),
-        //TODO: Add a Row here as your score keeper
+        Padding(
+          padding: const EdgeInsets.fromLTRB(6, 0, 6, 12),
+          child: Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 6,
+            runSpacing: 6,
+            children: brain.answers,
+          ),
+        )
       ],
     );
   }
-}
 
-/*
-question1: 'You can lead a cow down stairs but not up stairs.', false,
-question2: 'Approximately one quarter of human bones are in the feet.', true,
-question3: 'A slug\'s blood is green.', true,
-*/
+  void setAnswer(bool answer) => setState(() {
+        if (!brain.answer(answer)) {
+          Alert(
+            context: context,
+            title: 'Congrats:)',
+            desc: 'You have finished your quiz!',
+            buttons: [
+              DialogButton(
+                child: Text(
+                  "Reset",
+                  style: TextStyle(color: Colors.white, fontSize: 20),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                  setState(() {
+                    brain.reset();
+                  });
+                },
+                color: Color.fromRGBO(0, 179, 134, 1.0),
+              ),
+            ],
+          ).show();
+        }
+      });
+}
